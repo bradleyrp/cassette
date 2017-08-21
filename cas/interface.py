@@ -182,7 +182,7 @@ def sync_pull(**val):
 		if not source_this: raise Exception('!')
 		cmd = 'rsync -ariv %s%s ./%s'%(flag_exclude,source_this,dest)
 	print('[SYNC] pulling from %s to %s with "%s"'%(sourcepath,dest,cmd))
-	bash(cmd,catch=True)
+	bash(cmd,catch=False)
 
 def pull(which='all'):
 	"""
@@ -232,6 +232,8 @@ def dev(*args,**kwargs):
 		if details: raise Exception('invalid args %s'%details)
 		bash('%s %s'%(prefix,arg),catch=False)
 	elif arg=='add':
+		if '.' in details or '*' in details: raise Exception('do not add indiscriminately! '
+			'you will accidentally commit data to the code!')
 		fns = ' '.join(details)
 		print('[STATUS] adding files %s'%fns)
 		bash('%s add %s'%(prefix,fns),catch=False)
