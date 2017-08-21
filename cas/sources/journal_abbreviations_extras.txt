@@ -1,0 +1,13 @@
+Nature communications = Nat. Commun.
+Trends in Cell Biology = Trends Cell Biol.
+The Journal of Membrane Biology = J. Membr. Biol.
+The Journal of Chemical Physics = J. Chem. Phys.
+Physical Review E = Phys. Rev. E
+Scientific Reports = Sci. Rep.
+Cell Reports = Cell. Rep.
+Physiological Reviews = Physiol. Rev.
+Physica D: Nonlinear Phenomena = Physica D
+Computational and Theoretical Chemistry = Comput. Theor. Chem.
+Structure = Structure
+FEBS Journal = FEBS J.
+Computing in Science and Engineering = Comput. Sci. Eng.

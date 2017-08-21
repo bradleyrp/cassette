@@ -1,0 +1,110 @@
+
+%---simple article tex header for cassette
+
+%---class [options include: article, IEEEtran]
+%\documentclass[10pt,]{DOCCLASS}
+\documentclass[10pt,]{article}
+\usepackage[letterpaper,portrait,margin=1in]{geometry}
+
+%---encoding
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+
+%---requires (definitely) cbfonts (probably) newunicodechar,textgreek,babel-greek,greek-fontenc
+\usepackage{newunicodechar,textgreek}
+
+%---packages
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\setlistdepth{9}
+
+%---bibliography
+\usepackage[numbers,sort&compress,square]{natbib}
+\bibliographystyle{unsrt}
+
+%---required for mathscr (math script)
+\usepackage{mathrsfs}
+
+%---required for tables
+\usepackage{array,makecell}
+
+%---graphics
+\usepackage{graphicx,grffile}
+
+%---replace undefined references with a message
+\makeatletter
+\def\@setref#1#2#3{%
+  \ifx#1\relax
+   \protect\G@refundefinedtrue
+   \nfss@text{\reset@font\bfseries\huge\textcolor{red}{DEFINE #3 NOW, AND MAKE IT QUICK!}}%
+   \@latex@warning{Reference `#3' on page \thepage \space
+             undefined}%
+  \else
+   \expandafter#2#1\null
+  \fi}
+\makeatother
+
+%---ocgcolorlinks prints links in black but shows them in color
+\usepackage[unicode=true,ocgcolorlinks]{hyperref}
+
+%---newlines in tables
+\usepackage{tabularx}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+
+%---hyperlinks
+\hypersetup{
+breaklinks=true,
+bookmarks=true,
+pdfauthor={@AUTHORS},
+colorlinks=true,
+citecolor=blue,
+urlcolor=blue,
+linkcolor=blue,
+pdfborder={0 0 0}}
+
+%---floating
+\usepackage{float}
+\let\origfigure=\figure
+\let\endorigfigure=\endfigure
+\renewenvironment{figure}[1][]{%
+\origfigure[H]}{\endorigfigure}
+
+%---annotations
+\usepackage[rgb]{xcolor}
+%\usepackage[author={writer}]{pdfcomment}
+\usepackage{pdfcomment}
+
+%---date
+\date{}
+
+%---nice colors
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+\definecolor{babypink}{rgb}{0.96, 0.76, 0.76}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+
+%---syntax highlighting
+%---! off for now \usepackage{minted}
+\AfterEndPreamble{\def\PYGdefaultZsq{\textquotesingle}}
+
+%---row padding in tables
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\setlength{\extrarowheight}{5pt}
+\setlength{\arraycolsep}{5pt}
+
+
+%---END HEADER
+
+\begin{document}
+
+%---REPLACE TITLE
+%---REPLACE AUTHORS
+%---REPLACE MAKETITLE
+%---REPLACE ABSTRACT
+
+%---SECTION BODY
+%---SECTION BBL
+%---SECTION END

@@ -1,0 +1,52 @@
+
+%---requires texlive-achemso, texlive-mhchem
+
+\documentclass[journal=jacsat,manuscript=article]{achemso}
+\usepackage[version=3]{mhchem} % Formula subscripts using \ce{}
+\newcommand*\mycommand[1]{\texttt{\emph{#1}}}
+
+%---rpb additions
+\usepackage[rgb]{xcolor}
+\usepackage{pdfcomment}
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+\definecolor{babypink}{rgb}{0.96, 0.76, 0.76}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+
+%---REPLACE AUTHORBLOCK
+%---REPLACE TITLE
+
+%\abbreviations{IR,NMR,UV}
+%\keywords{American Chemical Society, \LaTeX}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% The "tocentry" environment can be used to create an entry for the
+%% graphical table of contents. It is given here as some journals
+%% require that it is printed as part of the abstract page. It will
+%% be automatically moved as appropriate.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{tocentry}
+
+%Some journals require a graphical entry for the Table of Contents.
+%This should be laid out ``print ready'' so that the sizing of the
+%text is correct.
+
+%Inside the \texttt{tocentry} environment, the font used is Helvetica
+%8\,pt, as required by \emph{Journal of the American Chemical
+%Society}.
+
+%The surrounding frame is 9\,cm by 3.5\,cm, which is the maximum
+%permitted for  \emph{Journal of the American Chemical Society}
+%graphical table of content entries. The box will not resize if the
+%content is too big: instead it will overflow the edge of the box.
+
+%This box and the associated title will always be printed on a
+%separate page at the end of the document.
+
+%\end{tocentry}
+
+%---REPLACE ABSTRACT
+%---SECTION BODY
+%---SECTION BBL
+%---SECTION END 

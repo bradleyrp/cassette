@@ -1,0 +1,56 @@
+\documentclass{letter}
+\usepackage[a4paper,left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm,headheight=-0.5cm]{geometry}
+
+\signature{
+%---REPLACE SIGNATURE
+}
+
+%---align address block to the left
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\opening}{l@}{r@}{}{}
+\patchcmd{\opening}{\@date\hfill\mbox{}\end}{\@date\end}{}{}
+\makeatother
+
+\address{
+%---REPLACE ORIGIN 
+\\
+}
+
+%---start annotations
+\usepackage{graphicx}
+%---annotations
+\usepackage[rgb]{xcolor}
+\usepackage{pdfcomment}
+%---nice colors
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+\definecolor{babypink}{rgb}{1.0, 0.0, 0.0}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+%---end annotations
+
+%---start logo
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[R]{}
+\fancyhead[L]{\includegraphics[width=4cm]{logo}}
+\pagestyle{plain}
+%---end logo
+
+\begin{document}
+
+\begin{letter}{
+%---REPLACE DESTINATION
+\\
+}
+
+\opening{
+%---REPLACE SALUTATION
+}
+
+\thispagestyle{fancy}
+
+%---SECTION BODY
+%---SECTION FOOTER
+%---SECTION END

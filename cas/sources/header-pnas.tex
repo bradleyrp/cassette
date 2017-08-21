@@ -1,0 +1,90 @@
+
+%---LOCAL pnas-new.cls
+%---LOCAL pnas.bst
+%---LOCAL widetext.sty
+%---LOCAL pnasresearcharticle.sty
+%---LOCAL pnas2011.bst
+
+\documentclass[9pt,twocolumn,twoside,final]{pnas-new}
+% Use the lineno option to display guide line numbers if required.
+% Note that the use of elements such as single-column equations
+% may affect the guide line number alignment. 
+
+\templatetype{pnasresearcharticle} 
+% Choose template 
+% {pnasresearcharticle} = Template for a two-column research article
+% {pnasmathematics} = Template for a one-column mathematics article
+% {pnasinvited} = Template for a PNAS invited submission
+
+%---REPLACE TITLE
+
+% Use letters for affiliations, numbers to show equal authorship (if applicable) and 
+% to indicate the corresponding author
+%\author[a,c,1]{Author One}
+%\author[b,1,2]{Author Two} 
+%\author[a]{Author Three}
+%\affil[a]{Affiliation One}
+%\affil[b]{Affiliation Two}
+%\affil[c]{Affiliation Three}
+
+%---REPLACE AUTHORS
+
+% Please give the surname of the lead author for the running footer
+\leadauthor{
+%---REPLACE LEADAUTHOR
+}
+
+% Please add here a significance statement to explain the relevance of your work
+\significancestatement{ 
+%---REPLACE SIGNIFICANCE 
+}
+
+% Please include corresponding author, author contribution and author declaration information
+
+\authorcontributions{
+%---REPLACE CONTRIBUTIONS
+}
+
+\authordeclaration{
+%---REPLACE INTERESTS
+}
+
+% equal author contributions should follow this format:
+% \equalauthors{\textsuperscript{1}A.O.(Author One) and A.T. (Author Two) contributed equally 
+% to this work (remove if not applicable).}
+
+\correspondingauthor{\textsuperscript{2}To whom correspondence should be addressed. E-mail: 
+%---REPLACE CORRESPONDING
+}
+
+% Keywords are not mandatory, but authors are strongly encouraged to provide them. 
+% If provided, please include two to five keywords, separated by the pipe symbol, e.g:
+%\keywords{Keyword 1 $|$ Keyword 2 $|$ Keyword 3 $|$ ...} 
+
+%---REPLACE KEYWORDS
+
+%---REPLACE ABSTRACT
+
+\dates{This manuscript was compiled on \today}
+\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+
+%---rpb added this so all vectors are bold
+\renewcommand{\vec}[1]{\mathbf{#1}}
+
+%---END HEADER
+
+\begin{document}
+
+% Optional adjustment to line up main text (after abstract) of first page with line numbers, 
+% when using both lineno and twocolumn options. You should only change this length when you've 
+% finalised the article contents.
+\verticaladjustment{-2pt}
+
+\maketitle
+
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
+
+%---SECTION BODY
+%---SECTION BBL
+%---SECTION END

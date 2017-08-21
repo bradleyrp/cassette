@@ -1,0 +1,12 @@
+#---gitignore for the data repository for cassette
+/README.md
+/history
+/images
+/printed
+/makefile
+/*.html
+/cas
+/.gitcas
+*.pyc
+/.pipeline_up_to_date
+/config.py
