@@ -220,6 +220,8 @@ def dev(*args,**kwargs):
 	valid_targets = ['status','commit','diff','add','push']
 	if arg not in valid_targets: 
 		raise Exception('invalid argument %s, must be in %s'%(arg,valid_targets))
+	if arg=='status':
+		print('[WARNING] '+fab('do not commit data to this code repository','cyan_black'))
 	#---special handling for commits because the makefile eats "-m". note this is experimental.
 	if arg=='commit':
 		message = ' '.join(details)
