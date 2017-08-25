@@ -682,6 +682,9 @@ class TexDocument:
 					#---search and replace figure captions made by figure_convert_html
 					if re.search('@fig',specific_parts[key][ll]) != None:
 						for figlabel in re.findall('@fig:(%s+)'%self.labelchars,specific_parts[key][ll]):
+							if figlabel not in imagenos:
+								raise Exception('figure named "%s" not found in the list of figures: %s'%(
+									figlabel,imagenos))
 							if re.search('@fig:%s([%s])'%(figlabel,self.spacing_chars),
 								specific_parts[key][ll]):
 								specific_parts[key][ll] = re.sub(

@@ -7,11 +7,17 @@ Cassette command-line interface.
 import os,sys,subprocess,glob,re,shutil,datetime,time
 import yaml
 
+#---the parser does all of the work
+if 'cas/parser' not in sys.path: sys.path.insert(0,'cas/parser')
+from parselib import TexDocument
+
 #---this script is a peer of makeface
 from makeface import asciitree,fab,bash,str_or_list,command_check
 
 #---name the silo for tracking clean copies of the texts
 siloname = 'history'
+#---a file that marks a repo as the cassette codes for init
+important_file = 'cas/parser/parselib.py'
 
 #---this script is imported by makeface.py so we only expose relevant functions
 __all__ = ['init','remake','pull','index','dev','bootstrap']
@@ -46,11 +52,11 @@ def prepare_tracker():
 
 def init():
 	"""Move the git codes into place. Runs only once."""
-	important_file = 'cas/parser/parselib.py'
+	global important_file
 	#---if .gitcas is absent and we find parselib.py in the current .git then we must move it out of the way
 	#---...once. this function should only run once
 	if not os.path.isdir('.gitcas') and os.path.isdir('.git'):
-		print('[STATUS] checking that .git holds cas/parser/parser.py before moving it out of the way')
+		print('[STATUS] checking that .git holds %s before moving it out of the way'%important_file)
 		#---only proceed if the .git directory is the cassette codes
 		if command_check('git ls-files %s --error-unmatch'%important_file):
 			make_silo()
@@ -93,7 +99,12 @@ def docket():
 def remake_single(name):
 	"""Rerender a document and track it."""
 	global siloname
-	bash('python ./cas/parser/parser.py %s.md'%name)
+
+	#---we can only run the parser if we have a silo
+	if not os.path.isdir('history'): 
+		raise Exception('cannot find `history` repo. you may need to run `make init` once!')
+	#---parse and render the document
+	doc = TexDocument('%s.md'%name)
 	print('[STATUS] compiled %s.md'%name)
 	print('[VIEW] file:///%s.html'%os.path.join(os.getcwd(),name))
 	print('[STATUS] saving %s.md'%name)
@@ -106,7 +117,7 @@ def remake_single(name):
 		bash('git --git-dir=./%s/.git --work-tree=%s/ add %s.pure'%(
 			siloname,siloname,name))
 		bash('git --git-dir=./%s/.git --work-tree=%s/ commit -m "added %s"'%(
-			siloname,siloname,name+'.pure'))
+			siloname,siloname,name+'.pure'),catch=False)
 	has_changes = not command_check(
 		'git --git-dir=./%s/.git --work-tree=%s/ diff --exit-code'%(siloname,siloname))
 	if has_changes:
@@ -114,7 +125,7 @@ def remake_single(name):
 		message = "%s +%s.md"%(timestamp,name)
 		cmd = 'git --git-dir ./%s/.git --work-tree=%s commit -a -m "%s"'%(siloname,siloname,message)
 		print('[STATUS] detected changes so we are committing via `%s`'%cmd)
-		bash(cmd)
+		bash(cmd,catch=False)
 	else: print('[STATUS] no changes to %s'%fn_rel)
 
 def remake():
@@ -138,8 +149,8 @@ def read_dispatch():
 	#---parse a dispatch.yaml if exists
 	dispatch_fn = 'dispatch.yaml'
 	if os.path.isfile(dispatch_fn): 
-		with open(dispatch_fn) as fp: dis = yaml.load(fp.read())
-		return dis
+		with open(dispatch_fn) as fp: dispatch = yaml.load(fp.read())
+		return dispatch
 	else: raise Exception('cannot read dispatch.yaml')
 
 def sync_pull(**val):
@@ -217,7 +228,7 @@ def dev(*args,**kwargs):
 		(args,kwargs))
 	arg,details = args[0],args[1:]
 	#---only allow certain git commands
-	valid_targets = ['status','commit','diff','add','push']
+	valid_targets = ['status','commit','diff','add','push','pull']
 	if arg not in valid_targets: 
 		raise Exception('invalid argument %s, must be in %s'%(arg,valid_targets))
 	if arg=='status':
@@ -228,7 +239,7 @@ def dev(*args,**kwargs):
 		if not details: raise Exception('cannot find a message in this commit')
 		print('[STATUS] committing to cassette with message "%s"'%message)
 		bash('%s commit -m "%s"'%(prefix,message),catch=False)
-	elif arg in ['status','diff','push']:
+	elif arg in ['status','diff','push','pull']:
 		#---no keywords allowed
 		if kwargs: raise Exception('invalid kwargs %s'%kwargs)
 		if details: raise Exception('invalid args %s'%details)
