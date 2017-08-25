@@ -45,9 +45,10 @@ verbose = False
 str_types = [str,unicode] if sys.version_info<(3,0) else [str]
 #---required hard-coded variables
 keys_required = ['config_fn','config_key','default_config']
-
 #---expose some functions from this script
 provided_here = ['set_config','setlist','config','unset','help']
+#---list of extra functionalities to enable
+extra_functionality = ['yaml']
 
 ###---UTILITY FUNCTIONS
 
@@ -140,6 +141,12 @@ def bash(command,log=None,cwd=None,inpipe=None,catch=True):
 	if log == None: 
 		if inpipe: raise Exception('under development')
 		kwargs = dict(cwd=cwd,shell=True,executable='/bin/bash')
+
+		#---WHY IS THIS CALLED LIKE THIS. REMOVE parser.py and just call parselib.py and use a different marker for init !!!
+
+		#---! it would be extremely useful to add a "tee"-like function here but it would supposedly
+		#---! ... require async or threads
+		#---! need documentation/consistent behavior on catch
 		if catch: kwargs.update(stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		proc = subprocess.Popen(command,**kwargs)
 		stdout,stderr = proc.communicate()
@@ -237,6 +244,29 @@ def asciitree(obj,depth=0,wide=2,last=[],recursed=False):
 			else: print('unhandled tree object')
 	else: print('unhandled tree object')
 	if not recursed: print('\n')
+
+###---EXTRAS
+
+if 'yaml' in extra_functionality:
+	"""
+	Users of YAML will appreciate importing it here with a duplicate-key safety check.
+	"""
+	import yaml
+	from yaml.constructor import ConstructorError
+	try: from yaml import CLoader as Loader
+	except ImportError: from yaml import Loader
+	def no_duplicates_constructor(loader,node,deep=False):
+		"""Check for duplicate keys."""
+		mapping = {}
+		for key_node,value_node in node.value:
+			key = loader.construct_object(key_node,deep=deep)
+			value = loader.construct_object(value_node,deep=deep)
+			if key in mapping: 
+				raise ConstructorError('while constructing a mapping',node.start_mark,
+					'found duplicate key "%s"'%key,key_node.start_mark)
+			mapping[key] = value
+		return loader.construct_mapping(node, deep)
+	yaml.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,no_duplicates_constructor)
 
 ###---CONFIG
 
