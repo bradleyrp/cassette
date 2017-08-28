@@ -141,12 +141,12 @@ def bash(command,log=None,cwd=None,inpipe=None,catch=True):
 	if log == None: 
 		if inpipe: raise Exception('under development')
 		kwargs = dict(cwd=cwd,shell=True,executable='/bin/bash')
-
-		#---WHY IS THIS CALLED LIKE THIS. REMOVE parser.py and just call parselib.py and use a different marker for init !!!
-
-		#---! it would be extremely useful to add a "tee"-like function here but it would supposedly
-		#---! ... require async or threads
-		#---! need documentation/consistent behavior on catch
+		#---note that you can either catch errors and raise exceptions if anything comes out in stderr and 
+		#---...then later print up the stdout with a delay or you can pipe the stdout directly to output and
+		#---...only later observe the error state when the program returns nonzero. you cannot do both without
+		#---...some kind of tee-like solution that would require asynchronous I/O or threading, so anytime you 
+		#---...need to invoke python you should obviously just import it and run it and reserve bash for 
+		#---...running non-python binaries
 		if catch: kwargs.update(stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		proc = subprocess.Popen(command,**kwargs)
 		stdout,stderr = proc.communicate()

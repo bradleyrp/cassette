@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-Cassette command-line interface.
+Cassette command-line interface (CLI) which renders new documents via plain `make` and also exposes some 
+useful functions for sharing images and tracking changes.
 """
 
 import os,sys,subprocess,glob,re,shutil,datetime,time
@@ -99,16 +100,15 @@ def docket():
 def remake_single(name):
 	"""Rerender a document and track it."""
 	global siloname
-
 	#---we can only run the parser if we have a silo
-	if not os.path.isdir('history'): 
-		raise Exception('cannot find `history` repo. you may need to run `make init` once!')
+	if not os.path.isdir(siloname): 
+		raise Exception('cannot find `%s` repo. you may need to run `make init` once!'%siloname)
 	#---parse and render the document
 	doc = TexDocument('%s.md'%name)
 	print('[STATUS] compiled %s.md'%name)
 	print('[VIEW] file:///%s.html'%os.path.join(os.getcwd(),name))
 	print('[STATUS] saving %s.md'%name)
-	fn_rel = os.path.join('history',name+'.pure')
+	fn_rel = os.path.join(siloname,name+'.pure')
 	was_committed = command_check(
 		'git --git-dir=./%s/.git --work-tree=%s/ ls-files %s.pure --error-unmatch'%(
 			siloname,siloname,name))
