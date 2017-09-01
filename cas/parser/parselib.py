@@ -83,7 +83,7 @@ class MDHeaderText:
 			key,val = m.group(1),m.group(2)
 			self.core[key] = val
 			if re.match('(True|true|yes|Y|y)',val): self.core[key] = True
-			elif re.match('(False|false|no|N|n)',val): self.core[key] = False
+			elif re.match('^(False|false|no|N|n)$',val): self.core[key] = False
 	
 		#---regex defns
 		#---specify the formats for different items in the header block
