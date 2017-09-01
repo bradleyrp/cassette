@@ -664,41 +664,39 @@ class TexDocument:
 		"""
 		#---make a copy of self.parts which we will make path substitutions in
 		specific_parts = {}
-		if self.images:
-			#---loop over each part and make the substitutions
-			for key in self.parts_list:
-				val = self.parts[key]
-				specific_parts[key] = val
-				imagenos = list(zip(*self.images))[0]
-				#---since figure_convert_html writes the bold figure titles carefully, we can simply replace 
-				#---...these by name. note that the greedy search in strong tags makes this precise
-				#---! switching to block of text from lines --- note that we should remove the lined versions
-				#---! ...and operate with blocks more often
-				specific_parts[key] = re.sub('<strong>@fig:(.*?)</strong>',
-					lambda x:'<strong>Figure %d. </strong>'%(imagenos.index(x.group(1))+1),
-					'\n'.join(specific_parts[key])).split('\n')
-				#---replace figure pointers with links
-				for ll,line in enumerate(specific_parts[key]):
-					#---search and replace figure captions made by figure_convert_html
-					if re.search('@fig',specific_parts[key][ll]) != None:
-						for figlabel in re.findall('@fig:(%s+)'%self.labelchars,specific_parts[key][ll]):
-							if figlabel not in imagenos:
-								raise Exception('figure named "%s" not found in the list of figures: %s'%(
-									figlabel,imagenos))
-							if re.search('@fig:%s([%s])'%(figlabel,self.spacing_chars),
-								specific_parts[key][ll]):
-								specific_parts[key][ll] = re.sub(
-									'@fig:(%s)([%s])'%(figlabel,self.spacing_chars),
-									lambda x:self.figstyle%(
-										r'<a href="#fig:%s">%s%d</a>%s'%(
-											figlabel,self.figpref,imagenos.index(x.group(1))+1,x.group(2))),
-									specific_parts[key][ll])
-					#---capitalize figures
-					#---! redundant with proc
-					for lineno,line in enumerate(self.parts[key]):
-						self.parts[key][lineno] = re.sub(r'\. figure',r'. Figure',self.parts[key][lineno])
-						self.parts[key][lineno] = re.sub('^figure','Figure',self.parts[key][lineno])
-			
+		#---loop over each part and make the substitutions
+		for key in self.parts_list:
+			val = self.parts[key]
+			specific_parts[key] = val
+			imagenos = list(zip(*self.images))[0] if self.images else []
+			#---since figure_convert_html writes the bold figure titles carefully, we can simply replace 
+			#---...these by name. note that the greedy search in strong tags makes this precise
+			#---! switching to block of text from lines --- note that we should remove the lined versions
+			#---! ...and operate with blocks more often
+			specific_parts[key] = re.sub('<strong>@fig:(.*?)</strong>',
+				lambda x:'<strong>Figure %d. </strong>'%(imagenos.index(x.group(1))+1),
+				'\n'.join(specific_parts[key])).split('\n')
+			#---replace figure pointers with links
+			for ll,line in enumerate(specific_parts[key]):
+				#---search and replace figure captions made by figure_convert_html
+				if re.search('@fig',specific_parts[key][ll]) != None:
+					for figlabel in re.findall('@fig:(%s+)'%self.labelchars,specific_parts[key][ll]):
+						if figlabel not in imagenos:
+							raise Exception('figure named "%s" not found in the list of figures: %s'%(
+								figlabel,imagenos))
+						if re.search('@fig:%s([%s])'%(figlabel,self.spacing_chars),
+							specific_parts[key][ll]):
+							specific_parts[key][ll] = re.sub(
+								'@fig:(%s)([%s])'%(figlabel,self.spacing_chars),
+								lambda x:self.figstyle%(
+									r'<a href="#fig:%s">%s%d</a>%s'%(
+										figlabel,self.figpref,imagenos.index(x.group(1))+1,x.group(2))),
+								specific_parts[key][ll])
+				#---capitalize figures
+				#---! redundant with proc
+				for lineno,line in enumerate(self.parts[key]):
+					self.parts[key][lineno] = re.sub(r'\. figure',r'. Figure',self.parts[key][lineno])
+					self.parts[key][lineno] = re.sub('^figure','Figure',self.parts[key][lineno])
 		with open(os.path.join(dn,fn+'.html'),'w') as fp:
 			for key in self.parts_list:
 				if key in specific_parts:
