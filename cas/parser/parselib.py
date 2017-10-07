@@ -149,7 +149,7 @@ class TexDocument:
 
 	#---where to store rendered documents and paraphanalia
 	package_prefix = 'printed/'
-	#---which type of latex citaitons to use
+	#---which type of la/tex citaitons to use
 	citation_type = 'cite'
 	latex_header_replacer = '^%---REPLACE\s*(.*?)\s*$'
 	latex_sectioner = '^%---SECTION\s*(.*?)\s*$'
@@ -158,7 +158,9 @@ class TexDocument:
 	labelchars = '[A-Za-z0-9_-]'
 	#---note that trailing parentheses is a spacing character because figure references can be parenthetical
 	spacing_chars = '\s:\.,\)'
-	bibkey = '[a-zA-Z\-]+-[0-9]{4}[a-z]?'
+	#---!temporary hack. removing the hyphen
+	#bibkey = '[a-zA-Z\-]+-[0-9]{4}[a-z]?'
+	bibkey = '[a-zA-Z\-]+-?[0-9]{4}[a-z]?'
 	available_tex_formats = ['article']
 	author_affiliation_regex = '^([^@]+)(?<!\\s)\\s*@?(.*)$'
 	equation_prefix = r"\renewcommand{\theequation}{%s\arabic{equation}}"
@@ -313,6 +315,13 @@ class TexDocument:
 				lambda x : '\n$$'+('' if not self.vectorbold else self.vector_bold_command)+
 					r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+"%s\end{equation}"%
 					(r"\label{eq:%s}"%underscore(x[1]) if x[1] else '')+'$$\n',})
+		#---handle block code here
+		self.subs_multi_html.update(**{'\n~~~\n(.*?)\n~~~\n':lambda x:
+			'<br><br><textarea style="'+
+			'width:100%;white-space: pre;overflow-wrap: normal;overflow-x: auto;resize: none;'+
+			'" rows="'+str(len(x[0].splitlines())-1+1)+'">'+x[0]+
+			'</textarea><br><br>'})
+			#---! added three rows above because it was too squished if you have overruns and the horizontal scroll
 
 		#---figure style for turning @fig:name into e.g. "figure (2)"
 		#---figure prefix for making supplements with figures numbered "S1" usw
@@ -610,6 +619,8 @@ class TexDocument:
 		#---track the order of images for numbering in HTML and conversion to PDF in LaTeX
 		#---! note that we disallow the use of the regular markdown figure syntax, which must be removed
 		self.images = [i[:2] for i in re.findall(self.figure_regex,newlined,re.MULTILINE+re.DOTALL)]
+		if self.images and not os.path.isdir(str(self.image_location)):
+			raise Exception('invalid image location %s'%self.image_location)
 		missing_images = [fn for name,fn in self.images 
 			if not os.path.isfile(os.path.join(self.image_location,fn))]
 		if any(missing_images):
@@ -668,14 +679,17 @@ class TexDocument:
 		for key in self.parts_list:
 			val = self.parts[key]
 			specific_parts[key] = val
+			#import pdb;pdb.set_trace()
 			imagenos = list(zip(*self.images))[0] if self.images else []
 			#---since figure_convert_html writes the bold figure titles carefully, we can simply replace 
 			#---...these by name. note that the greedy search in strong tags makes this precise
 			#---! switching to block of text from lines --- note that we should remove the lined versions
-			#---! ...and operate with blocks more often
-			specific_parts[key] = re.sub('<strong>@fig:(.*?)</strong>',
+			#---! ...and operate with blocks more often. we suffix the newline here so the HTML is not all on one line
+			#---! ...and also so that
+			specific_parts[key] = ['%s\n'%i for i in 
+				re.sub('<strong>@fig:(.*?)</strong>',
 				lambda x:'<strong>Figure %d. </strong>'%(imagenos.index(x.group(1))+1),
-				'\n'.join(specific_parts[key])).split('\n')
+				''.join(specific_parts[key])).split('\n')]
 			#---replace figure pointers with links
 			for ll,line in enumerate(specific_parts[key]):
 				#---search and replace figure captions made by figure_convert_html
@@ -701,10 +715,8 @@ class TexDocument:
 			for key in self.parts_list:
 				if key in specific_parts:
 					val = specific_parts[key]
-					if type(val)==str: 
-						fp.write(val)
-					elif type(val)==list:
-						for line in val: fp.write(line)
+					if type(val)==str: fp.write(val)
+					elif type(val)==list: fp.write(''.join(val))
 					else: raise Exception('\n[ERROR] cannot understand this part of the document: %s'%key)
 					fp.write('\n')
 
@@ -893,12 +905,22 @@ class TexDocument:
 		width = 1.0
 		for key,val in mods.items():
 			if key == 'width': width = val
+			#---! keys for wrap figure stashed here
+			elif key in ['nlines','position','wrapw']: pass
 			else: raise Exception('[ERROR] not sure how to handle figure mod: %s=%s'%(str(key),str(val)))
 		label = (r"\label{fig:%s}"%underscore(extracts[0]) if extracts[0] else '')
-		text = (r"\begin{figure}[htbp]"+'\n'+r"\centering"+'\n'+
+		figure_bracket = (r"\begin{figure}[htbp]",r"\end{figure}")
+		if self.specs.spec('wrap_figure',False):
+			nlines = mods.get('nlines',10)
+			position = mods.get('position','l')
+			wrap_width = mods.get('wrapw',0.5)
+			figure_bracket = (r"\begin{wrapfigure}[%d]{%s}{%s\textwidth}"%(
+				nlines,position,'%0.2f'%wrap_width),
+				r"\end{wrapfigure}")
+		text = (figure_bracket[0]+'\n'+r"\centering"+'\n'+
 			r"\includegraphics[width=%.2f\linewidth]{%s}"%(width,path)+
 			'\n'+r"\caption{%s%s}"%(caption,label)+'\n'+
-			r"\end{figure}"+'\n\n')
+			figure_bracket[1]+'\n\n')
 		return text
 
 	def figure_convert_html(self,extracts):
@@ -914,6 +936,8 @@ class TexDocument:
 		style = ""
 		for key,val in mods.items():
 			if key == 'width': style = style + "width:%d"%(int(val*100))+'%;'
+			#---! keys for wrap figure stashed here
+			elif key in ['nlines','position','wrapw']: pass
 			else: raise Exception('[ERROR] not sure how to handle figure mod: %s=%s'%(str(key),str(val)))
 		label = extracts[0] if extracts[0] else False
 		figure_text_html = '\n'.join([
@@ -942,7 +966,8 @@ class TexDocument:
 		"""
 		#---use re.split and re.findall to iteratively replace references in groups
 		for lineno,line in enumerate(self.parts[part]):
-			if re.search('(\[?@[a-zA-Z]+-[0-9]{4}[a-z]?\s?;?\s?)+\]?',line)!=None:
+			#---! hacking the bibkey some more. see self.bibkey defn
+			if re.search('(\[?@[a-zA-Z]+-?[0-9]{4}[a-z]?\s?;?\s?)+\]?',line)!=None:
 				refs = re.findall('\[?@(%s)(?:\s\|\Z|\])?'%self.bibkey,line)
 				notrefs = re.split('@%s'%self.bibkey,line)
 				self.refs.extend(refs)
