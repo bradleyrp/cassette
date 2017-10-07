@@ -341,7 +341,7 @@ class TexDocument:
 			lambda x:self.figstyle%(r"\ref{fig:%s}"%(underscore(x.group(1))))})
 			#---previously: but some texlive forbids underscores: self.figstyle%(r"\\ref{fig:\1}")})
 		self.subs_tex.update(**{'@sec:(%s+)'%self.labelchars:
-			lambda x:self.secstyle%(r"\ref{fig:%s}"%(underscore(x.group(1))))})
+			lambda x:self.secstyle%(r"\ref{sec:%s}"%(underscore(x.group(1))))})
 			#---previously: self.secstyle%(r"\\ref{sec:\1}")})
 		self.subs_tex.update(**{'@eq:(%s+)'%self.labelchars:
 			lambda x:self.eqnstyle%(r"\ref{eq:%s}"%(underscore(x.group(1))))})
