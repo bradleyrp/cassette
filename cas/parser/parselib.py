@@ -576,17 +576,22 @@ class TexDocument:
 			dat = ''.join(biblines[slice(*linesnip(biblines,'@[A-Za-z]+\{%s'%key,'@'))])
 			authors = ''.join(re.findall('(?:A|a)uthor\s*=\s*\{([^\}]+)',dat))
 			try: year = int(re.findall('(?:Y|y)ear\s*=\s*\{([^\}]+)',dat)[0])
-			except: raise Exception('[ERROR] cannot find bibkey "%s" in the database'%key)
-			title = re.findall('(?:T|t)itle\s*=\s*\{([^\}]+)',dat)[0]
+			except: raise Exception('[ERROR] cannot find bibkey "%s" in the database (check the year)'%key)
+			title = re.findall('(?:T|t)itle\s*=\s*\{+([^\}]+)',dat)[0]
 			try: journal = re.findall('Journal\s*=\s*\{([^\}]+)',dat)[0]
 			except: journal = ''
 			try: url = re.findall('(?:U|u)rl\s*=\s*\{([^\}]+)',dat)[0]
 			except: url = "BROKEN LINK"
 			if journal != '':
-				entry = '%s<br><a href="%s">%s</a>.<br><em>%s</em>, %d.'%(authors,url,title,journal,year)
+				#! make this more concise
+				if url!='BROKEN LINK':
+					entry = '%s<br><a href="%s">%s</a>.<br><em>%s</em>, %d.'%(authors,url,title,journal,year)
+				else: entry = '%s<br>%s.<br><em>%s</em>, %d.'%(authors,title,journal,year)
 			else:
 				#---! probably a book?
-				entry = '%s<br><a href="%s">%s</a>, %d.'%(authors,url,title,year)
+				if url!='BROKEN LINK':
+					entry = '%s<br><a href="%s">%s</a>, %d.'%(authors,url,title,year)
+				else: entry = '%s<br>%s, %d.'%(authors,title,year)
 			details[key] = entry
 
 		#---loop over references at the end
