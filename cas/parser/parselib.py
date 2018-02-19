@@ -861,7 +861,7 @@ class TexDocument:
 					fp.write(line)
 			#---after packing we zip everything
 			#---! disabled for now
-			if False:
+			if self.specs.spec('compress',False):
 				print("[STATUS] zipping")
 				proc = subprocess.Popen('zip -r %s.zip %s'%(directory,directory),cwd=os.getcwd(),shell=True)
 				proc.communicate()
