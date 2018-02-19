@@ -178,9 +178,9 @@ class TexDocument:
 	#---rules for TeX documents
 	rules_tex = {
 		#---turn hash-prefixed headings into section delimiters with an optional label
-		'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s : '\%s%s{%s%s}\n'%(
+		'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s,is_num=False : '\%s%s%s{%s%s}\n'%(
 			{1:'section',2:'subsection',3:'subsubsection',4:'paragraph',5:'subparagraph'}[len(s[0])],
-			s[1],s[2],'' if not s[3] else r"\label{sec:%s}"%underscore(s[3])),}
+			s[1],'' if is_num else '*',s[2],'' if not s[3] else r"\label{sec:%s}"%underscore(s[3])),}
 
 	#---replacement rules for HTML
 	rules_html = {
@@ -262,6 +262,7 @@ class TexDocument:
 		(r' \'',r' `'),
 		(r'\' ',"' "),
 		(r'~',r'$\sim$'),
+		#---! an ellipses inside of a highlight causes problems
 		(r'\.\.\.',r'\ldots'),
 		(r"([0-9]+\.?[0-9]*)%",r"\1\%"),])
 	special_subs_html = odict([
@@ -576,17 +577,22 @@ class TexDocument:
 			dat = ''.join(biblines[slice(*linesnip(biblines,'@[A-Za-z]+\{%s'%key,'@'))])
 			authors = ''.join(re.findall('(?:A|a)uthor\s*=\s*\{([^\}]+)',dat))
 			try: year = int(re.findall('(?:Y|y)ear\s*=\s*\{([^\}]+)',dat)[0])
-			except: raise Exception('[ERROR] cannot find bibkey "%s" in the database'%key)
-			title = re.findall('(?:T|t)itle\s*=\s*\{([^\}]+)',dat)[0]
+			except: raise Exception('[ERROR] cannot find bibkey "%s" in the database (check the year)'%key)
+			title = re.findall('(?:T|t)itle\s*=\s*\{+([^\}]+)',dat)[0]
 			try: journal = re.findall('Journal\s*=\s*\{([^\}]+)',dat)[0]
 			except: journal = ''
 			try: url = re.findall('(?:U|u)rl\s*=\s*\{([^\}]+)',dat)[0]
 			except: url = "BROKEN LINK"
 			if journal != '':
-				entry = '%s<br><a href="%s">%s</a>.<br><em>%s</em>, %d.'%(authors,url,title,journal,year)
+				#! make this more concise
+				if url!='BROKEN LINK':
+					entry = '%s<br><a href="%s">%s</a>.<br><em>%s</em>, %d.'%(authors,url,title,journal,year)
+				else: entry = '%s<br>%s.<br><em>%s</em>, %d.'%(authors,title,journal,year)
 			else:
 				#---! probably a book?
-				entry = '%s<br><a href="%s">%s</a>, %d.'%(authors,url,title,year)
+				if url!='BROKEN LINK':
+					entry = '%s<br><a href="%s">%s</a>, %d.'%(authors,url,title,year)
+				else: entry = '%s<br>%s, %d.'%(authors,title,year)
 			details[key] = entry
 
 		#---loop over references at the end
@@ -919,7 +925,8 @@ class TexDocument:
 				r"\end{wrapfigure}")
 		text = (figure_bracket[0]+'\n'+r"\centering"+'\n'+
 			r"\includegraphics[width=%.2f\linewidth]{%s}"%(width,path)+
-			'\n'+r"\caption{%s%s}"%(caption,label)+'\n'+
+			#---allow no figure caption if blank
+			'\n'+(r"\caption{%s%s}"%(caption,label) if caption else label)+'\n'+
 			figure_bracket[1]+'\n\n')
 		return text
 
