@@ -21,7 +21,7 @@ siloname = 'history'
 important_file = 'cas/parser/parselib.py'
 
 #---this script is imported by makeface.py so we only expose relevant functions
-__all__ = ['init','remake','pull','index','dev','bootstrap']
+__all__ = ['init','remake','pull','index','dev','bootstrap','demo']
 
 ###---INITIALIZATION
 
@@ -278,3 +278,10 @@ def bootstrap(host=None,source=None):
 				break
 			except: continue
 	print('[STATUS] bootstrap complete')
+
+def demo():
+	"""Copy the demo file to the root directory so users can compile it."""
+	if not os.path.isfile('demo.md'): 
+		shutil.copyfile('cas/sources/demo.md','demo.md')
+		print('[NOTE] see `demo.md` for a demonstration of the cassette features. run `make` to compile it.')
+	else: print('[NOTE] `demo.md` already exists')

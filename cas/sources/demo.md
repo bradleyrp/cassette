@@ -34,12 +34,12 @@ vecbold: true
 Cassettes are small sets of codes that make it easy to write, share, revise, and remember your academic documents.
 
 !figure: icon
-./cas/sources/tiler/cassette.png
+./cas/sources/cassette.png
 {width=0.35}
 What a sweet logo! It looks just like an audio cassette inexplicably printing a written document. That the word "cassette" is derived from the diminutive of the French *casse* for *case*. These codes are a "small case for academic documents".
 
 !figure: icon_again
-./cas/sources/tiler/cassette.png
+./cas/sources/cassette.png
 {width=0.35}
 Repeated.
 
@@ -48,7 +48,7 @@ Repeated.
 Cassette supports both ~\LaTeX\xspace|$\rm\LaTeX$~ and HTML formats. It receives user commans exclusively through the `make` command. By default, every document is rendered to an HTML document which serves as the `make` target. Latex commands are rendered in HTML with `[MathJax](https://www.mathjax.org/)` --- the only caveat is that serving the resulting HTML files over an `http` connection will require users to authorize the use of the `MathJax` server, otherwise they will be looking at the `TeX` source. Only equations will be rendered with `TeX`, however the cassette-inflected markdown syntax covers most of the most popular syntax available in a `TeX` document anyway.
 
 !figure: icon_a_third
-./cas/sources/tiler/cassette.png
+./cas/sources/cassette.png
 {width=0.35}
 Repeated2.
 
