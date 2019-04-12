@@ -86,12 +86,14 @@ def docket():
 	"""
 	#---in the previous makefile we recompiled documents with target "%.html: %md" which means that all 
 	#---...markdown files must be compiled to HTML on an update
-	check_files = lambda y: map(lambda x:re.match('^(.*?)\.%s$'%y,x).group(1),glob.glob('*.%s'%y))
+	#! added list below not sure why. why is required? otherwise it has to rerender always for no reason
+	check_files = lambda y: list(map(lambda x:re.match('^(.*?)\.%s$'%y,x).group(1),glob.glob('*.%s'%y)))
 	targets = check_files('md')
 	results = check_files('html')
 	instructions = dict()
 	for base in targets:
-		if base not in results: instructions[base] = 'new'
+		if base not in results: 
+			instructions[base] = 'new'
 		else:
 			if os.path.getmtime('%s.md'%base)>os.path.getmtime('%s.html'%base): instructions[base] = 'update'
 			else: print('[STATUS] %s is up to date'%base)

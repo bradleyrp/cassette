@@ -20,6 +20,7 @@ body {
 	height:auto;
 	font-weight:400;
 	overflow-y:scroll;
+	overflow-x: hidden;
 	}
 	}
 h1, h3, h4 {
@@ -84,8 +85,9 @@ toptext {
 	color:gray;
 	}
 a {
-	color:black;
+	color:medium-blue;
 	text-decoration:none;
+	cursor: pointer;
 	}
 em {font-style:italic;}
 strong {font-weight:bold;}
@@ -356,7 +358,8 @@ code {
 	font-weight:400; 
 	text-decoration:underline;*/
 	font-weight:600;
-	color: #0000ff;
+	/*color: #0000ff;*/
+	color: medium-blue;
 	}
 .article_text p img 
 	{
@@ -383,8 +386,8 @@ code {
 .article_text ol > li{
     position: relative;
     margin-bottom: 15px;
-    padding: 1.0em;
-    background-color: #d5d5d5;
+    padding: 0 0 0 5px;
+    /*background-color: #d5d5d5;*/
 }
 .article_text ol > li:before {
 	font-family: 'sans',sans-serif;
@@ -392,7 +395,7 @@ code {
     top: 0;
     left: -1.8em;
     width: 1.8em;
-    height: 1.8em;
+    height: 1.6em;
     font-size: 1.5em;
     line-height: 1.8;
     text-align: center;
@@ -418,3 +421,33 @@ code {
 
 sup { vertical-align: top; position: relative; top: -0.4em; }
 
+/*---tooltips---*/
+.tooltip {
+	font-weight:400;
+	color: black;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    white-space:nowrap;
+}
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 180px;
+    background-color: silver;
+    text-align: left;
+    position: absolute;
+    font-size: 10px;
+    padding: 5px 5px;
+    z-index: 1;
+    line-height:1.0em;
+    white-space:normal;
+}
+.article_text .tooltip .tooltiptext a {color:black;}
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+/*---highlight targets---*/
+:target {
+   background-color: #ffa;
+}
+article_text ol > li:target {background-color: #ffa;};

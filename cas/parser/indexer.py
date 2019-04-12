@@ -47,9 +47,10 @@ html += ['<h1><img src="cas/sources/cassette.png" '+
 #---pdf path naming convention
 pather = {
 	'pdf':lambda name,format : 'printed/%s-%s/%s.pdf'%(name,format,name),
+	'tex':lambda name,format : 'printed/%s-%s/%s.tex'%(name,format,name),
 	'html':lambda name : '%s.html'%name,}
 section_names = {'pdf':'<strong>pdf</strong> <text color="gray">(LaTeX)</text>',
-	'html':'<strong>web</strong>'}
+	'html':'<strong>web</strong>','tex':'<strong>latex</strong>'}
 
 #---assemble orderings
 index = [[],[]]
@@ -72,7 +73,7 @@ if os.path.isfile(dissertation_fn):
 		'</h3>']
 
 #---write the sections
-for section in ['html','pdf']:
+for section in ['html','pdf','tex']:
 	html += ["<h3>%s</h3>"%section_names[section]]
 	for ind,t in zip(index,'ou'):
 		html += ["<%sl>"%t]
@@ -82,6 +83,17 @@ for section in ['html','pdf']:
 				if 'pdf' in copies[name]:
 					for format in copies[name]['pdf']:
 						point = pather['pdf'](name,format)
+						link += [(' <strong>[<a style="color:red;" '+
+							'href="%s" target=\"_blank\">%s</a>]</strong>')
+							%(point,format)]
+					link += ["</li>"]
+					html += [''.join(link)]
+			#! lazy repeat of above
+			elif section == 'tex':
+				link = ["<li>%s: "%name]
+				if 'pdf' in copies[name]:
+					for format in copies[name]['pdf']:
+						point = pather['tex'](name,format)
 						link += [(' <strong>[<a style="color:red;" '+
 							'href="%s" target=\"_blank\">%s</a>]</strong>')
 							%(point,format)]

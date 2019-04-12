@@ -1,9 +1,17 @@
 
 %---requires texlive-achemso, texlive-mhchem
 
+% add hidelinks below to get rid of link highlights
 \documentclass[journal=jacsat,manuscript=article]{achemso}
 \usepackage[version=3]{mhchem} % Formula subscripts using \ce{}
 \newcommand*\mycommand[1]{\texttt{\emph{#1}}}
+
+% other colors for editing
+\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = blue,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
 
 %---rpb additions
 \usepackage[rgb]{xcolor}
@@ -12,11 +20,50 @@
 \definecolor{babypink}{rgb}{0.96, 0.76, 0.76}
 \definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
 
+% replacing pdfcomment with soul directly. see comments near pdfcomment in header-jacs.tex
+% ... also includes patch for highlit-spaces-only problem
+\usepackage{soul}
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\SOUL@ulunderline}{\dimen@}{\SOUL@dimen}{}{}
+\patchcmd{\SOUL@ulunderline}{\dimen@}{\SOUL@dimen}{}{}
+\patchcmd{\SOUL@ulunderline}{\dimen@}{\SOUL@dimen}{}{}
+\newdimen\SOUL@dimen
+\makeatother
+
+% another color
+\newcommand{\hlcyan}[1]{{\sethlcolor{cyan}\hl{#1}}}
+
+% for captions
+%\usepackage{caption}
+%\captionsetup[table]{position=bottom}
+% for vertical padding on table
+%\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{boldline,multirow}
+
+% trying to stop captions running off the page
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
+
 %---REPLACE AUTHORBLOCK
 %---REPLACE TITLE
 
 %\abbreviations{IR,NMR,UV}
 %\keywords{American Chemical Society, \LaTeX}
+
+% prevent floats before a section?
+\usepackage[section]{placeins}
+% using max height
+\usepackage[export]{adjustbox} % loads also graphicx
+
+% some chemistry words are too long and run off the page
+\pretolerance=10000
+
+% for lesssim and gtrsim
+\usepackage{amssymb}
 
 \begin{document}
 
@@ -49,4 +96,5 @@
 %---REPLACE ABSTRACT
 %---SECTION BODY
 %---SECTION BBL
+%---SECTION POST
 %---SECTION END 
