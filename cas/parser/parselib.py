@@ -151,23 +151,23 @@ class TexDocument:
 	package_prefix = 'printed/'
 	#---which type of la/tex citaitons to use
 	citation_type = 'cite'
-	latex_header_replacer = '^%---REPLACE\s*(.*?)\s*$'
-	latex_sectioner = '^%---SECTION\s*(.*?)\s*$'
-	markup_regex = "\\\pdfmarkupcomment\\[markup=[A-Za-z]+,color=[A-Za-z]+\\]\{([^\}]+)\}\{[^\}]*\}"
+	latex_header_replacer = r'^%---REPLACE\s*(.*?)\s*$'
+	latex_sectioner = r'^%---SECTION\s*(.*?)\s*$'
+	markup_regex = r"\\\pdfmarkupcomment\\[markup=[A-Za-z]+,color=[A-Za-z]+\\]\{([^\}]+)\}\{[^\}]*\}"
 	vector_bold_command = r"% all vectors are bold"+'\n'+r'\renewcommand{\vec}[1]{\mathbf{#1}}'+'\n'
 	labelchars = '[A-Za-z0-9_-]'
 	#---note that trailing parentheses is a spacing character because figure references can be parenthetical
-	spacing_chars = '\s:\.,\)'
+	spacing_chars = r'\s:\.,\)'
 	#---!temporary hack. removing the hyphen
 	#bibkey = '[a-zA-Z\-]+-[0-9]{4}[a-z]?'
-	bibkey = '[a-zA-Z\-]+-?[0-9]{4}[a-z]?'
+	bibkey = r'[a-zA-Z\-]+-?[0-9]{4}[a-z]?'
 	available_tex_formats = ['article']
 	author_affiliation_regex = '^([^@]+)(?<!\\s)\\s*@?(.*)$'
 	equation_prefix = r"\renewcommand{\theequation}{%s\arabic{equation}}"
 	section_prefix = r"\renewcommand{\thesection}{%s\arabic{section}}"
 	figure_prefix = r"\renewcommand{\thefigure}{%s\arabic{figure}}"
 	table_prefix = r"\renewcommand{\thetable}{%s\arabic{table}}"
-	figure_regex = '!figure:\s*(?:([^\n]+))\n([^\n]+)\s(.*?)(?=\n\n|\Z)'
+	figure_regex = r'!figure:\s*(?:([^\n]+))\n([^\n]+)\s(.*?)(?=\n\n|\Z)'
 	regex_block_comment = r"(?:[:]{3})\s*\n(.*?)\n\s*(?:[:]{3})\s*\n"
 	regex_line_comment = r"^[:]{3,}\s*[^\s]+(.+)"
 	regex_equation = r"^\$\$\s*$(.*?)\n\$\$\s*(?:\{#eq:([^\}]+)\})?"
@@ -178,32 +178,32 @@ class TexDocument:
 	#---rules for TeX documents
 	rules_tex = {
 		#---turn hash-prefixed headings into section delimiters with an optional label
-		'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s,is_num=False : '\%s%s%s{%s%s}\n'%(
+		r'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s,is_num=False : '\%s%s%s{%s%s}\n'%(
 			{1:'section',2:'subsection',3:'subsubsection',4:'paragraph',5:'subparagraph'}[len(s[0])],
 			s[1],'' if is_num else '*',s[2],'' if not s[3] else r"\label{sec:%s}"%underscore(s[3])),}
 
 	#---replacement rules for HTML
 	rules_html = {
-		'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s : '\n<br><h%d %s>%s</h%d>\n'%(
+		r'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s : '\n<br><h%d %s>%s</h%d>\n'%(
 			len(s[0])+1,'id="%s"'%('-'.join(s[2].split(' ')).lower() if not s[3] 
 			else s[3]),s[2],len(s[0])+1),
-		'^>+\s*$':lambda s : s,
-		'^[0-9]+\.\s?(.+)':lambda s : '<li>%s</li>\n'%s,
-		'^\s*$':lambda s : '<p>',}
+		r'^>+\s*$':lambda s : s,
+		r'^[0-9]+\.\s?(.+)':lambda s : '<li>%s</li>\n'%s,
+		r'^\s*$':lambda s : '<p>',}
 
 	#---note that order matters in the following dictionary
 	subs_tex = odict([
-		('\[\[([^\]]+)\]\]',r"\pdfmarkupcomment[markup=Highlight,color=yellow]{\1}{}"),
+		(r'\[\[([^\]]+)\]\]',r"\pdfmarkupcomment[markup=Highlight,color=yellow]{\1}{}"),
 		(regex_inline_comment,r""),
 		(regex_line_comment,r""),
-		('\[([^\]]+)\]\(([^\)]+)\)',r'\href{\2}{\1}'),
-		('\<\<([^\>]+)\>\>',
+		(r'\[([^\]]+)\]\(([^\)]+)\)',r'\href{\2}{\1}'),
+		(r'\<\<([^\>]+)\>\>',
 			r"\\textcolor{babypink}{\pdfmarkupcomment[markup=Highlight,color=aliceblue]{\1}{}}"),
-		('\$([^\$]+)\$',r"$\mathrm{\1}$"),
-		('\*\*([^\*]+)\*\*',r'\\textbf{\1}'),
-		('\*([^\*]+)\*',r'\emph{\1}'),
+		(r'\$([^\$]+)\$',r"$\mathrm{\1}$"),
+		(r'\*\*([^\*]+)\*\*',r'\\textbf{\1}'),
+		(r'\*([^\*]+)\*',r'\emph{\1}'),
 		('"([^"]+)"',r"``\1''"),
-		('^[0-9]+\.\s?(.+)',r'\item \1'+'\n'),
+		(r'^[0-9]+\.\s?(.+)',r'\item \1'+'\n'),
 		#(r"\%",r"\\%"),
 		#(r"([0-9]+)?\?%",r"\1%"),
 		('([^`])`([^`]+)`',r"\1 \\texttt{\2}"),
@@ -215,30 +215,30 @@ class TexDocument:
 
 	#---multiline regex substitutions or replacements for LaTeX
 	subs_multi_tex = {
-		'\n\n([0-9]+\.)':r"\\begin{enumerate} \\item ",
-		'\n([0-9]+\.\s*[^\n]+)\n\n':'\n'+r"\1"+'\n'+r"\\end{enumerate}"+'\n',
+		r'\n\n([0-9]+\.)':r"\\begin{enumerate} \\item ",
+		r'\n([0-9]+\.\s*[^\n]+)\n\n':'\n'+r"\1"+'\n'+r"\\end{enumerate}"+'\n',
 		regex_block_comment:'\n',
 		regex_equation:
-			lambda x : '\n'+r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+'\n'+"%s\end{equation}"%
+			lambda x : '\n'+r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+'\n'+r"%s\end{equation}"%
 			(r"\label{eq:%s}"%underscore(x[1])+'\n' if x[1] else '')+'\n\n',}
 
 	#---? figure will not be capitalized sometimes
 	#---? double asterisk may not work if dictionary in wrong order
 	subs_html = odict([
 		(r" \\\\ ",''),
-		('\*\*([^\*]+)\*\*',r'<strong>\1</strong>'),
-		('\*([^\*]+)\*',r'<em>\1</em>'),
-		('\[\[([^\]]+)\]\]',r"""<span style="background-color: #FFFF00">\1</span>"""),
-		('\<\<([^\>]+)\>\>',r"""<span style="background-color: #F0F8FF; color: #F4C2C2">\1</span>"""),
+		(r'\*\*([^\*]+)\*\*',r'<strong>\1</strong>'),
+		(r'\*([^\*]+)\*',r'<em>\1</em>'),
+		(r'\[\[([^\]]+)\]\]',r"""<span style="background-color: #FFFF00">\1</span>"""),
+		(r'\<\<([^\>]+)\>\>',r"""<span style="background-color: #F0F8FF; color: #F4C2C2">\1</span>"""),
 		(regex_inline_comment,r""),
 		(regex_line_comment,r""),
-		('\$([^\$]+)\$',r"$\mathrm{\1}$"),
-		("\\\pdfmarkupcomment\\[markup=[A-Za-z]+,color=[A-Za-z]+\\]\{([^\}]+)\}\{[^\}]*\}",
+		(r'\$([^\$]+)\$',r"$\mathrm{\1}$"),
+		(r"\\\pdfmarkupcomment\\[markup=[A-Za-z]+,color=[A-Za-z]+\\]\{([^\}]+)\}\{[^\}]*\}",
 			r"""<span style="background-color: #FFFF00">\1</span>"""),
 		('(?:``)([^\']+)(?:\'\')',r"&#8220;\1&#8221;"),
 		('`([^`]+)`',r"<code>\1</code>"),
-		('\[([^\]]+)\]\(([^\)]+)\)',r'<a href="\2">\1</a>'),
-		('^>\s*(.+)',r"<blockquote>\1</blockquote>"),
+		(r'\[([^\]]+)\]\(([^\)]+)\)',r'<a href="\2">\1</a>'),
+		(r'^>\s*(.+)',r"<blockquote>\1</blockquote>"),
 		#---had to remove the following for python3
 		# '\\\AA':'\unicode{x212B}',
 		(r"@chap:(%s+)"%labelchars,r'<a href="\1.html">N</a>'),
@@ -249,8 +249,8 @@ class TexDocument:
 
 	subs_multi_html = {
 		regex_block_comment:'\n',
-		'\n\n([0-9]+\.)':'\n<ol>\n'+r"\1",
-		'\n([0-9]+\.\s*[^\n]+)\n\n':'\n'+r"\1"+'\n</ol>\n',
+		r'\n\n([0-9]+\.)':'\n<ol>\n'+r"\1",
+		r'\n([0-9]+\.\s*[^\n]+)\n\n':'\n'+r"\1"+'\n</ol>\n',
 		r"(?:\\begin\{table\})(.*?)(?:\\end\{table\})":
 			'<text style="color:gray"><strong>cannot render tex table (see the PDF)</strong></text>',}
 
@@ -275,7 +275,7 @@ class TexDocument:
 		if type(fn)==list: raise Exception('expecting a file name')
 		else: 
 			with open(fn) as fp: self.raw = fp.read()
-			self.name = re.findall('([^\/]+)\.md$',fn)[0]
+			self.name = re.findall(r'([^\/]+)\.md$',fn)[0]
 		#---parse the header and store the body
 		self.specs = MDHeaderText(self.raw)
 		self.body = self.specs.core.pop('body')
@@ -303,7 +303,7 @@ class TexDocument:
 				setattr(self,subs,odict(tex_html_subs))
 
 		#---autodetect available LaTeX headers
-		self.available_tex_formats = [re.match('^header-(.+)\.tex',os.path.basename(fn)).group(1)
+		self.available_tex_formats = [re.match(r'^header-(.+)\.tex',os.path.basename(fn)).group(1)
 			for fn in glob.glob('cas/sources/header-*.tex')]
 
 		#---figure paths and equation settings (e.g. vectorbold) must be decided on the fly
@@ -314,7 +314,7 @@ class TexDocument:
 			self.figure_regex:self.figure_convert_html,
 			self.regex_equation:
 				lambda x : '\n$$'+('' if not self.vectorbold else self.vector_bold_command)+
-					r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+"%s\end{equation}"%
+					r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+r"%s\end{equation}"%
 					(r"\label{eq:%s}"%underscore(x[1]) if x[1] else '')+'$$\n',})
 		#---handle block code here
 		self.subs_multi_html.update(**{'\n~~~\n(.*?)\n~~~\n':lambda x:
@@ -373,7 +373,7 @@ class TexDocument:
 					for fn in along_list: shutil.copy(fn,os.path.join(self.package_dir,''))
 				with open('./cas/sources/header-%s.tex'%rt) as fp: self.parts['header'] = fp.readlines()
 				#---the "LOCAL" keyword in a TeX header comment specifies files that must be copied
-				regex = '^\s*%-+\s*LOCAL\s*([^\s]+)\s*$'
+				regex = r'^\s*%-+\s*LOCAL\s*([^\s]+)\s*$'
 				reqs = [re.match(regex,i).group(1) for i in self.parts['header'] if re.match(regex,i)]
 				for req in reqs: shutil.copy(os.path.join('cas/sources',req),self.package_dir)
 
@@ -398,7 +398,7 @@ class TexDocument:
 				self.bib()
 
 				#---the NOCOMPILE comment flag prevents compile steps in the case of e.g. chapters
-				nocompile = any([i for i in self.parts['header'] if re.match('^\s*%-+\s*NOCOMPILE',i)])
+				nocompile = any([i for i in self.parts['header'] if re.match(r'^\s*%-+\s*NOCOMPILE',i)])
 
 				#---extras
 				if not nocompile:
@@ -444,7 +444,7 @@ class TexDocument:
 		Save a version of this file suitable for git, specifically with one sentence per line.
 		"""
 		perfect_text = self.specs.header
-		perfect_text += re.sub("(\.|\?|\.\")[ \t]+([^\n])",r"\1\n\2",self.body)
+		perfect_text += re.sub(r"(\.|\?|\.\")[ \t]+([^\n])",r"\1\n\2",self.body)
 		perfect_text = re.sub('[\n]{2,}','\n\n',perfect_text)
 		purename = self.puredir+'/'+self.name+'.pure'
 		with open(purename,'w') as fp: fp.write(perfect_text)
@@ -549,7 +549,7 @@ class TexDocument:
 		#---entry starting line numbers
 		lnos = linesnip(biblines,'@',is_header=False)
 		#---we must exclude comments from the bib file
-		bibkeys = [re.findall('@[A-Za-z]+\s?\{([^,]+),',biblines[ll])[0] 
+		bibkeys = [re.findall(r'@[A-Za-z]+\s?\{([^,]+),',biblines[ll])[0] 
 			for ll in lnos if re.match('^@(?!comment)',biblines[ll])]
 
 		regex_bibref = r"\[?@(%s)(?:\s|\])?"
@@ -574,14 +574,14 @@ class TexDocument:
 		details = {}
 		for key in sorted(ordlookup.keys()):
 			#---extract data from bibtex
-			dat = ''.join(biblines[slice(*linesnip(biblines,'@[A-Za-z]+\{%s'%key,'@'))])
-			authors = ''.join(re.findall('(?:A|a)uthor\s*=\s*\{([^\}]+)',dat))
-			try: year = int(re.findall('(?:Y|y)ear\s*=\s*\{([^\}]+)',dat)[0])
+			dat = ''.join(biblines[slice(*linesnip(biblines,r'@[A-Za-z]+\{%s'%key,'@'))])
+			authors = ''.join(re.findall(r'(?:A|a)uthor\s*=\s*\{([^\}]+)',dat))
+			try: year = int(re.findall(r'(?:Y|y)ear\s*=\s*\{([^\}]+)',dat)[0])
 			except: raise Exception('[ERROR] cannot find bibkey "%s" in the database (check the year)'%key)
-			title = re.findall('(?:T|t)itle\s*=\s*\{+([^\}]+)',dat)[0]
-			try: journal = re.findall('Journal\s*=\s*\{([^\}]+)',dat)[0]
+			title = re.findall(r'(?:T|t)itle\s*=\s*\{+([^\}]+)',dat)[0]
+			try: journal = re.findall(r'Journal\s*=\s*\{([^\}]+)',dat)[0]
 			except: journal = ''
-			try: url = re.findall('(?:U|u)rl\s*=\s*\{([^\}]+)',dat)[0]
+			try: url = re.findall(r'(?:U|u)rl\s*=\s*\{([^\}]+)',dat)[0]
 			except: url = "BROKEN LINK"
 			if journal != '':
 				#! make this more concise
@@ -663,11 +663,7 @@ class TexDocument:
 		#---substitution rules
 		for lineno,line in enumerate(self.parts[part]):
 			for rule,convert in subs.items():
-				try:
-					self.parts[part][lineno] = re.sub(rule,convert,self.parts[part][lineno])
-				except:
-					import pdb;pdb.set_trace()
-
+				self.parts[part][lineno] = re.sub(rule,convert,self.parts[part][lineno])
 		#---special latex substitutions
 		for lineno,line in enumerate(self.parts[part]):
 			for a,b in special_subs.items(): 
@@ -733,7 +729,7 @@ class TexDocument:
 		"""
 		Add a line to the header.
 		"""
-		lastline = next(ii for ii,i in enumerate(self['header']) if re.match('^\s*\%-+END HEADER',i))
+		lastline = next(ii for ii,i in enumerate(self['header']) if re.match(r'^\s*\%-+END HEADER',i))
 		self['header'].insert(lastline,line)
 
 	def __getitem__(self,index): return self.parts[index]
@@ -742,7 +738,7 @@ class TexDocument:
 		"""
 		Extract the body of the text, separating it from the header.
 		"""
-		return self.raw[linesnip(self.raw,'^-+\s+?$')[-1]+1:]
+		return self.raw[linesnip(self.raw,r'^-+\s+?$')[-1]+1:]
 
 	def add(self,**kwargs):
 		"""
@@ -809,7 +805,7 @@ class TexDocument:
 					#---! this is a hackish way to apply self.image_location
 					re.sub(os.path.join(os.getcwd(),path),
 						'{fig_%s}.pdf'%label,str(line)) for line in specific_parts[key]
-					if self.tex_comments or not re.match('\s*%',str(line))]
+					if self.tex_comments or not re.match(r'\s*%',str(line))]
 
 		final_text = ''
 		for key,val in specific_parts.items():
@@ -889,7 +885,7 @@ class TexDocument:
 		useful information about how to format a figure.
 		"""
 		#---extract any modifiers from the caption
-		regex_param_line = '^(\s*\{)(.+)(\}\s*)$'
+		regex_param_line = r'^(\s*\{)(.+)(\}\s*)$'
 		#---defaults
 		extras,style = {'width':1},[]
 		if re.match(regex_param_line,caption,re.MULTILINE): 
@@ -977,8 +973,8 @@ class TexDocument:
 		#---use re.split and re.findall to iteratively replace references in groups
 		for lineno,line in enumerate(self.parts[part]):
 			#---! hacking the bibkey some more. see self.bibkey defn
-			if re.search('(\[?@[a-zA-Z]+-?[0-9]{4}[a-z]?\s?;?\s?)+\]?',line)!=None:
-				refs = re.findall('\[?@(%s)(?:\s\|\Z|\])?'%self.bibkey,line)
+			if re.search(r'(\[?@[a-zA-Z]+-?[0-9]{4}[a-z]?\s?;?\s?)+\]?',line)!=None:
+				refs = re.findall(r'\[?@(%s)(?:\s\|\Z|\])?'%self.bibkey,line)
 				notrefs = re.split('@%s'%self.bibkey,line)
 				self.refs.extend(refs)
 				#---! cannot start a line with a reference
@@ -986,7 +982,7 @@ class TexDocument:
 				inside_reference = False
 				for ii,i in enumerate(notrefs[1:]):
 					if inside_reference == False: 
-						newline.append('\%s{'%self.citation_type)
+						newline.append(r'\%s{'%self.citation_type)
 						inside_reference = True
 					newline.append(refs[ii])
 					#---terminate the reference at the end of the line automatically
