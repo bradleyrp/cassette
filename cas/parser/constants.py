@@ -3,7 +3,7 @@
 #---for write_tex_png function
 template = r"""
 \documentclass[border=2pt]{standalone}
-\usepackage{amsmath}
+\usepackage{amsmath,amssymb}
 \usepackage{varwidth}
 %s
 \begin{document}

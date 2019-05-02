@@ -19,7 +19,7 @@ def write_tex_png(formula,name,count,label=None,vectorbold=False):
 	#---specify the template for a standalone equation
 	#---note the linewidth below might be too small for lengthy equations
 	template_tex_png = '\n'.join([r"",r"\documentclass[border=2pt]{standalone}",r"\usepackage{varwidth}",
-		r"\usepackage{amsmath}",r"%s",r"\begin{document}",r"\begin{varwidth}{\linewidth}",
+		r"\usepackage{amsmath,amssymb}",r"%s",r"\begin{document}",r"\begin{varwidth}{\linewidth}",
 		r"\begin{equation*}","%s",r"\end{equation*}",r"\end{varwidth}",r"\end{document}"])
 	tmpdir = tempfile.mkdtemp()
 	outtex = (template_tex_png%('' if not vectorbold 
@@ -663,7 +663,10 @@ class TexDocument:
 		#---substitution rules
 		for lineno,line in enumerate(self.parts[part]):
 			for rule,convert in subs.items():
-				self.parts[part][lineno] = re.sub(rule,convert,self.parts[part][lineno])
+				try:
+					self.parts[part][lineno] = re.sub(rule,convert,self.parts[part][lineno])
+				except:
+					import pdb;pdb.set_trace()
 
 		#---special latex substitutions
 		for lineno,line in enumerate(self.parts[part]):
