@@ -8,6 +8,8 @@ import tempfile
 import shutil
 import yaml
 
+#! see software.md for notes on regex. you probably need to change a lot of regexes!
+
 ###---STANDALONES
 
 def write_tex_png(formula,name,count,label=None,vectorbold=False):
@@ -26,7 +28,7 @@ def write_tex_png(formula,name,count,label=None,vectorbold=False):
 		else TexDocument.vector_bold_command,formula.strip('., '))).split('\n')
 	for ll,line in enumerate(outtex):
 		if re.match(r'^\\label',line): outtex[ll] = ''
-	print_tex = [i for i in outtex if not re.match('^\s*$',i)]
+	print_tex = [i for i in outtex if not re.match(r'^\s*$',i)]
 	with open('%s/snaptex2.tex'%tmpdir,'w') as fp: fp.write('\n'.join(print_tex))
 	os.system('pdflatex --output-directory=%s %s/snaptex2.tex'%(tmpdir,tmpdir))
 	os.system('convert -trim -density 300 '+
@@ -162,7 +164,7 @@ class TexDocument:
 	#bibkey = '[a-zA-Z\-]+-[0-9]{4}[a-z]?'
 	bibkey = r'[a-zA-Z\-]+-?[0-9]{4}[a-z]?'
 	available_tex_formats = ['article']
-	author_affiliation_regex = '^([^@]+)(?<!\\s)\\s*@?(.*)$'
+	author_affiliation_regex = r'^([^@]+)(?<!\s)\s*@?(.*)$'
 	equation_prefix = r"\renewcommand{\theequation}{%s\arabic{equation}}"
 	section_prefix = r"\renewcommand{\thesection}{%s\arabic{section}}"
 	figure_prefix = r"\renewcommand{\thefigure}{%s\arabic{figure}}"
@@ -178,7 +180,7 @@ class TexDocument:
 	#---rules for TeX documents
 	rules_tex = {
 		#---turn hash-prefixed headings into section delimiters with an optional label
-		r'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s,is_num=False : '\%s%s%s{%s%s}\n'%(
+		r'^(#+)(\*)?\s*(.*?)\s*(?:\{#sec:(.+)\})?$':lambda s,is_num=False : r'\%s%s%s{%s%s}\n'%(
 			{1:'section',2:'subsection',3:'subsubsection',4:'paragraph',5:'subparagraph'}[len(s[0])],
 			s[1],'' if is_num else '*',s[2],'' if not s[3] else r"\label{sec:%s}"%underscore(s[3])),}
 
@@ -193,17 +195,17 @@ class TexDocument:
 
 	#---note that order matters in the following dictionary
 	subs_tex = odict([
-		(r'\[\[([^\]]+)\]\]',r"\pdfmarkupcomment[markup=Highlight,color=yellow]{\1}{}"),
+		(r'\[\[([^\]]+)\]\]',r"\\pdfmarkupcomment[markup=Highlight,color=yellow]{\1}{}"),
 		(regex_inline_comment,r""),
 		(regex_line_comment,r""),
-		(r'\[([^\]]+)\]\(([^\)]+)\)',r'\href{\2}{\1}'),
+		(r'\[([^\]]+)\]\(([^\)]+)\)',r'\\href{\2}{\1}'),
 		(r'\<\<([^\>]+)\>\>',
-			r"\\textcolor{babypink}{\pdfmarkupcomment[markup=Highlight,color=aliceblue]{\1}{}}"),
-		(r'\$([^\$]+)\$',r"$\mathrm{\1}$"),
+			r"\\textcolor{babypink}{\\pdfmarkupcomment[markup=Highlight,color=aliceblue]{\1}{}}"),
+		(r'\$([^\$]+)\$',r"$\\mathrm{\1}$"),
 		(r'\*\*([^\*]+)\*\*',r'\\textbf{\1}'),
-		(r'\*([^\*]+)\*',r'\emph{\1}'),
+		(r'\*([^\*]+)\*',r'\\emph{\1}'),
 		('"([^"]+)"',r"``\1''"),
-		(r'^[0-9]+\.\s?(.+)',r'\item \1'+'\n'),
+		(r'^[0-9]+\.\s?(.+)',r'\\item \1'+'\n'),
 		#(r"\%",r"\\%"),
 		#(r"([0-9]+)?\?%",r"\1%"),
 		('([^`])`([^`]+)`',r"\1 \\texttt{\2}"),
@@ -219,7 +221,7 @@ class TexDocument:
 		r'\n([0-9]+\.\s*[^\n]+)\n\n':'\n'+r"\1"+'\n'+r"\\end{enumerate}"+'\n',
 		regex_block_comment:'\n',
 		regex_equation:
-			lambda x : '\n'+r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+'\n'+r"%s\end{equation}"%
+			lambda x : '\n'+r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+'\n'+r"%s\\end{equation}"%
 			(r"\label{eq:%s}"%underscore(x[1])+'\n' if x[1] else '')+'\n\n',}
 
 	#---? figure will not be capitalized sometimes
@@ -232,8 +234,8 @@ class TexDocument:
 		(r'\<\<([^\>]+)\>\>',r"""<span style="background-color: #F0F8FF; color: #F4C2C2">\1</span>"""),
 		(regex_inline_comment,r""),
 		(regex_line_comment,r""),
-		(r'\$([^\$]+)\$',r"$\mathrm{\1}$"),
-		(r"\\\pdfmarkupcomment\\[markup=[A-Za-z]+,color=[A-Za-z]+\\]\{([^\}]+)\}\{[^\}]*\}",
+		(r'\$([^\$]+)\$',r"$\\mathrm{\1}$"),
+		(r"\\pdfmarkupcomment\\[markup=[A-Za-z]+,color=[A-Za-z]+\\]\{([^\}]+)\}\{[^\}]*\}",
 			r"""<span style="background-color: #FFFF00">\1</span>"""),
 		('(?:``)([^\']+)(?:\'\')',r"&#8220;\1&#8221;"),
 		('`([^`]+)`',r"<code>\1</code>"),
@@ -261,9 +263,9 @@ class TexDocument:
 		#---! previously (r'" ',"'' "),
 		(r' \'',r' `'),
 		(r'\' ',"' "),
-		(r'~',r'$\sim$'),
+		(r'~',r'$\\sim$'),
 		#---! an ellipses inside of a highlight causes problems
-		(r'\.\.\.',r'\ldots'),
+		(r'\.\.\.',r'\\ldots'),
 		(r"([0-9]+\.?[0-9]*)%",r"\1\%"),])
 	special_subs_html = odict([
 		(r'---',r'&mdash;'),])
@@ -314,7 +316,7 @@ class TexDocument:
 			self.figure_regex:self.figure_convert_html,
 			self.regex_equation:
 				lambda x : '\n$$'+('' if not self.vectorbold else self.vector_bold_command)+
-					r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+r"%s\end{equation}"%
+					r"\begin{equation}%s"%('' if x[1] else r'\notag')+x[0]+r"%s\\end{equation}"%
 					(r"\label{eq:%s}"%underscore(x[1]) if x[1] else '')+'$$\n',})
 		#---handle block code here
 		self.subs_multi_html.update(**{'\n~~~\n(.*?)\n~~~\n':lambda x:
@@ -349,7 +351,7 @@ class TexDocument:
 			#---previously: self.eqnstyle%(r"\\ref{eq:\1}")})
 		self.subs_html.update(**{'@sec:(%s+)'%self.labelchars:
 			'<a href="#%s">%s</a>'%(r"\1",self.secstyle_html%(self.secpref+r"\1")),
-			'@(eq:%s+)'%self.labelchars:self.eqnstyle%r"$\eqref{\1}$"})
+			'@(eq:%s+)'%self.labelchars:self.eqnstyle%r"$\\eqref{\1}$"})
 		self.bibfile = self.specs.spec('bibliography')
 		self.write_equation_images = self.specs.bool('write_equation_images')
 
@@ -464,7 +466,7 @@ class TexDocument:
 		#---default header settings for LaTeX
 		instructions = {
 			'end':r'\end{document}',
-			'maketitle':'\\maketitle',
+			'maketitle':r'\maketitle',
 			'title':r'\title{%s}'%self.specs.spec('title'),
 			'abstract':('\n\\begin{abstract}\n'+
 				self.specs.spec('abstract')+'\n\\end{abstract}'
@@ -914,14 +916,14 @@ class TexDocument:
 			elif key in ['nlines','position','wrapw']: pass
 			else: raise Exception('[ERROR] not sure how to handle figure mod: %s=%s'%(str(key),str(val)))
 		label = (r"\label{fig:%s}"%underscore(extracts[0]) if extracts[0] else '')
-		figure_bracket = (r"\begin{figure}[htbp]",r"\end{figure}")
+		figure_bracket = (r"\begin{figure}[htbp]",r"\\end{figure}")
 		if self.specs.spec('wrap_figure',False):
 			nlines = mods.get('nlines',10)
 			position = mods.get('position','l')
 			wrap_width = mods.get('wrapw',0.5)
 			figure_bracket = (r"\begin{wrapfigure}[%d]{%s}{%s\textwidth}"%(
 				nlines,position,'%0.2f'%wrap_width),
-				r"\end{wrapfigure}")
+				r"\\end{wrapfigure}")
 		text = (figure_bracket[0]+'\n'+r"\centering"+'\n'+
 			r"\includegraphics[width=%.2f\linewidth]{%s}"%(width,path)+
 			#---allow no figure caption if blank
